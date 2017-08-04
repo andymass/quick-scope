@@ -74,6 +74,7 @@ vnoremap <silent> <plug>(QuickScopeToggle) :<c-u>call <sid>toggle()<cr>
 " Detect if the running instance of Vim acts as a GUI or terminal.
 function! s:get_term()
   if has('gui_running') || (has('nvim') && $NVIM_TUI_ENABLE_TRUE_COLOR)
+      \ || (has('termguicolors') && &termguicolors)
     let term = 'gui'
   else
     let term ='cterm'
