@@ -111,11 +111,17 @@ endfunction
 
 " Set or append to a custom highlight group.
 function! s:add_to_highlight_group(group, attr, color)
-  execute printf("highlight %s %s%s=%s", a:group, s:get_term(), a:attr, a:color)
+  let term = s:get_term()
+  if a:attr == '' && (has('termguicolors') && &termguicolors)
+    let term = 'cterm'
+  endif
+  execute printf("highlight %s %s%s=%s", a:group, term, a:attr, a:color)
 endfunction
 
 " Set the colors used for highlighting.
 function! s:set_highlight_colors()
+  let term = s:get_term()
+
   " Priority for overruling other highlight matches.
   let s:priority = 1
 
@@ -127,18 +133,18 @@ function! s:set_highlight_colors()
   " press.
   let s:hi_group_cursor = 'QuickScopeCursor'
 
-  if !exists('g:qs_first_occurrence_highlight_color')
+  if !exists('g:qs_first_occurrence_highlight_color_'.term)
     " set color to match 'Function' highlight group or lime green
     let s:primary_highlight_color = s:set_default_color('Function', '#afff5f', 155, 10)
   else
-    let s:primary_highlight_color = g:qs_first_occurrence_highlight_color
+    let s:primary_highlight_color = eval('g:qs_first_occurrence_highlight_color_'.term)
   endif
 
-  if !exists('g:qs_second_occurrence_highlight_color')
+  if !exists('g:qs_second_occurrence_highlight_color_'.term)
     " set color to match 'Keyword' highlight group or cyan
     let s:secondary_highlight_color = s:set_default_color('Define', '#5fffff', 81, 14)
   else
-    let s:secondary_highlight_color = g:qs_second_occurrence_highlight_color
+    let s:secondary_highlight_color = eval('g:qs_second_occurrence_highlight_color_'.term)
   endif
 
   call s:add_to_highlight_group(s:hi_group_primary, '', 'underline')
@@ -149,7 +155,7 @@ function! s:set_highlight_colors()
 
   " Preserve the background color of cursorline if it exists.
   if &cursorline
-    let bg_color = synIDattr(synIDtrans(hlID('CursorLine')), 'bg', s:get_term())
+    let bg_color = synIDattr(synIDtrans(hlID('CursorLine')), 'bg', term)
 
     if bg_color != -1
       call s:add_to_highlight_group(s:hi_group_primary, 'bg', bg_color)
